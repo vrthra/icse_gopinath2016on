@@ -24,8 +24,7 @@ build/data/MutMin.tar.gz: | build build/data
 .PHONY: data
 
 data: | build build/data
-	curl http://eecs.osuosl.org/rahul/icse2016/MutMin.tar.gz -o build/data/MutMin.tar.gz
-	cd build/data; cat *.tar.gz| gzip -dc | tar -xvpf - ; R CMD INSTALL MutMin
+	cat data/MutMin.tar.gz | (cd build/data; gzip -dc | tar -xvpf - ; R CMD INSTALL MutMin )
 
 build build/data:
 	mkdir -p build/data
