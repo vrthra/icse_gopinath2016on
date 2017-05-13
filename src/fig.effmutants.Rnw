@@ -1,0 +1,9 @@
+<<effmutants.x, out.width='.95\\linewidth', echo=F, message=F, warn=F,fig.lp="fig:">>=
+ggplot(agg.db, aes(x=det.mutants, y=utility, size=log10(best.origtc))) +
+  coord_trans(x="log10") +
+  geom_point(shape=1) + theme_classic() +
+  theme(legend.position=c(.85,.35)) +
+  xlab("Number of detected mutants") +
+  labs(size = "Minimal test suite (log10)")
+  # geom_hline(aes(yintercept=mean(agg.db$utility), color='red'))
+@

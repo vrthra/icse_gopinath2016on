@@ -1,0 +1,69 @@
+\section{Conclusion}
+\label{sec:conclusion}
+
+Our research suggests that blind random sampling of mutants is highly
+effective compared to the best achievable bound for mutation reduction
+strategies, using perfect knowledge of mutation analysis results,
+and there is surprisingly little room for improvement. Previous
+researchers showed that there is very little advantage to
+\emph{current} operator selection strategies compared to random
+sampling~\cite{zhang2010isoperator,zhang2013operator}. However, the experiment
+lacked direct comparison with random sampling of the \emph{same} number of
+mutants. Secondly it was also shown that \emph{current} strategies
+fare poorly~\cite{ammann2014establishing} when compared to the actual minimum mutant
+set, but lacked comparison to random sampling. Our contribution
+is to show that there is a theoretical limit to the improvement that any reduction
+strategy can have \emph{irrespective} of the intelligence of the strategy,
+and also a \emph{direct} empirical comparison of effectiveness of the
+best strategy possible with random sampling.
+
+Our theoretical investigation suggests a mean advantage of $58.2\%$
+for a perfect mutation reduction strategy with oracular knowledge of
+kills over random sampling given an arbitrary program, under the
+assumption of no skew in redundant mutants. Empirically, we find a
+much lower advantage
+\Sexpr{mean(agg.db$effectiveness)*100}\% for a perfect reduction
+strategy with oracular knowledge. Even if we eliminate the effects of
+skew in redundant mutant population by considering only distinguished
+mutants, we find that the advantage of a perfect mutation reduction
+strategy is only \Sexpr{mean(u.agg.db$effectiveness)*100}\%
+in comparison to random sampling.  The low impact of skew
+(\Sexpr{mean(u.agg.db$effectiveness - agg.db$effectiveness)*100}\%)
+suggests that our simplifying assumptions for theoretical analysis were
+not very far off the mark. The disparity between the theoretical
+prediction and empirical results is due to the inadequacies of real
+world test suites, resulting in a much smaller minimum mutant set than
+the distinguishable mutant set.
+We note that mutation reduction strategies routinely
+claim high reduction factors, and one might expect a similar magnitude of
+utility over random sampling, which fails to materialize either in
+theory or practice.
+
+The second takeaway from our research is that a researcher or an
+implementor of mutation testing tools should consider the
+value of implementing a mutation reduction strategy carefully
+given the limited utility we observe. In fact, our research~\cite{gopinath2015domutation}
+suggests that popular operator selection strategies we examined have reduced
+utility compared to random sampling, and even strata sampling techniques based
+on program elements seldom exceed a 10\% improvement. Given that the
+variability due to projects is significant, a testing practitioner
+would also do well to consider whether the mutation reduction strategy
+being used is suited for the particular system under test (perhaps based on
+historical data for that project, or projects that are in some
+established sense similar).
+Random sampling of mutants is not extremely far from an empirical
+upper bound on an ideal mutation reduction strategy, and has the
+advantage of having little room for an unanticipated bias due to a
+``clever'' selection method that might not work well for a given
+project.  The limit reported here is based on using full
+knowledge of the mutation kill matrix, which is, to say the least, difficult to attain in practice.
+
+Perhaps the most important takeaway from our research is that it is
+possible to improve the effectiveness of mutation analysis, not by
+removing mutation operators, but rather by further research into newer
+mutation operators (or new categories of mutation operators such as
+domain specific operators for concurrency or resource allocation). Our
+research suggests that the maximum reduction in utility due to addition
+of newer operators is just $23.268$\%, while there is no limit to the
+achievable improvement.
+

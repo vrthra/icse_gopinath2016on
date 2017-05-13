@@ -1,0 +1,111 @@
+\newcommand{\Pitnvmc}{NMC\xspace}
+\newcommand{\Pitnc}{NC\xspace}
+\newcommand{\Pitrc}{RC\xspace}
+\newcommand{\Pitdc}{DC\xspace}
+\newcommand{\Pitrv}{RV\xspace}
+\newcommand{\Pitic}{IC\xspace}
+\newcommand{\Pitcc}{CC\xspace}
+\newcommand{\Pitemv}{EMV\xspace}
+\newcommand{\Pitvmc}{VMC\xspace}
+\newcommand{\Pitm}{M\xspace}
+\newcommand{\Pitcb}{CB\xspace}
+\newcommand{\Piti}{I\xspace}
+\newcommand{\Pitri}{RI\xspace}
+\newcommand{\Pitrs}{RS\xspace}
+\newcommand{\Pites}{ES\xspace}
+\newcommand{\Pitin}{IN\xspace}
+\begin{comment}
+<<setup, include=FALSE, message=FALSE, echo=FALSE>>=
+options(digits=3)
+opts_chunk$set(fig.path='figure/twocolumn-', fig.align='center', fig.show='hold', echo=FALSE)
+opts_chunk$set(cache=TRUE)
+render_listings()
+require(reshape2)
+require(scales)
+require(xtable)
+require(ggplot2)
+@
+
+<<chunk-hook, echo=2>>=
+require(MutMin)
+v=data(package='MutMin')
+data(list = v$results[,3])
+rownames(agg.db) <- agg.db$project
+rownames(u.agg.db) <- u.agg.db$project
+
+my_origtc <- my.info['origtc', 'limits']
+info.db.t <- t.test(info.db$effectiveness)
+u.info.db.t <- t.test(u.info.db$effectiveness)
+
+agg.db.t <- t.test(agg.db$effectiveness)
+u.agg.db.t <- t.test(u.agg.db$effectiveness)
+
+info.db.u <- wilcox.test(info.db$effectiveness, conf.int=T)
+u.info.db.u <- wilcox.test(u.info.db$effectiveness, conf.int=T)
+
+agg.db.u <- wilcox.test(agg.db$effectiveness, conf.int=T)
+u.agg.db.u <- wilcox.test(u.agg.db$effectiveness, conf.int=T)
+
+agg.db$muscore <- agg.db$det.mutants/agg.db$all.mutants * 100.0
+u.agg.db$muscore <- u.agg.db$det.mutants/agg.db$all.mutants * 100.0
+
+agg.db$udet.mutants <- u.agg.db$det.mutants
+
+a <- anova(lm(effectiveness~project+best.mintc+sample.mintc_mutant, data=info.db))
+u.a <- anova(lm(effectiveness~project+best.mintc+sample.mintc_mutant, data=u.info.db))
+
+s <- summary(lm(effectiveness~project*sample.mintc_mutant, data=info.db))
+u.s <- summary(lm(effectiveness~project*sample.mintc_mutant, data=u.info.db))
+
+info.db$mean <- NA
+for (i in unique(info.db$project)) {
+  info.db[info.db$project == i,]$mean <- mean(info.db[info.db$project==i,]$best.mintc)
+}
+info.db$meandiff <- (info.db$mean - info.db$best.mintc) / info.db$mean * 100
+
+info.db$utility <- info.db$effectiveness
+u.info.db$utility <- u.info.db$effectiveness
+agg.db$utility <- agg.db$effectiveness
+u.agg.db$utility <- u.agg.db$effectiveness
+
+welltested <- subset(agg.db, muscore > 70 & all.mutants > 10000)
+my.names <- rownames(welltested)
+u.welltested <- subset(u.agg.db, row.names(u.agg.db) %in% my.names)
+
+
+cloc <- read.csv('data/cloc.RData', header=T)
+subjects <- subset(agg.db, select=c('project', 'all.mutants', 'det.mutants', 'udet.mutants', 'best.origtc', 'best.mintc'))
+subjects$cloc <- cloc[subjects$project,]
+subjects$score <- subjects$det.mutants / subjects$all.mutants * 100.0
+
+others <- read.csv('data/similarpapers.csv')
+others$muscore <- with(others,ifelse(as.character(paper) == 'siami2008sufficient', neq/2000.0, neq*1.0/nm))
+others$muscore <- with(others,ifelse(as.character(paper) == 'siami2008sufficient' & as.character(program)   == 'tacas', neq*1.0/nm, neq*1.0/nm))
+
+zhang2013operator <- subset(others, as.character(paper) == 'zhang2013operator')
+siami2008sufficient <- subset(others, as.character(paper) == 'siami2008sufficient')
+zhang2010isoperator <- subset(others, as.character(paper) == 'zhang2010isoperator')
+zhang2014empirical <- subset(others, as.character(paper) == 'zhang2014empirical')
+
+@
+
+\end{comment}
+<<introduction, child='introduction.Rnw'>>=
+@
+<<related, child='related.Rnw'>>=
+@
+
+<<theory, child='theory.Rnw'>>=
+@
+
+<<empirical, child='empirical.Rnw'>>=
+@
+
+<<results, child='results.Rnw'>>=
+@
+<<discussion, child='discussion.Rnw'>>=
+@
+<<threats, child='threats.Rnw'>>=
+@
+<<conclusion, child='conclusion.Rnw'>>=
+@

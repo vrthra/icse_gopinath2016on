@@ -1,0 +1,84 @@
+\section{Discussion}
+\label{sec:discussion}
+Mutation analysis is an invaluable tool that  is often difficult
+to use in practice due to hefty computational requirements. There
+is ongoing and active research to remedy this situation using different
+mutation reduction strategies. Hence, it is important to understand
+the amount by which one can hope to improve upon the simplest baseline
+strategy for reduction --- pure random sampling.
+
+Our theoretical analysis of a simple idealized system finds a mean
+improvement of $58.2\%$ over random sampling for a mutation reduction
+strategy with oracular knowledge of mutation kills given a uniform
+distribution of mutants. This serves as an upper bound of what any
+known mutation reduction strategy could be expected to achieve
+(under the assumption that the mutant distribution is reasonably
+close to uniform).
+
+Our empirical analysis using a large number of open source projects
+reveals that the practical limit is much lower, however, on average only
+\Sexpr{mean(agg.db$effectiveness)*100}\% for mutants
+produced by PIT. Even if we discount the effects of skew, by using
+only distinguished mutants, the potential improvement is restricted to
+\Sexpr{mean(u.agg.db$effectiveness)*100}\% on average.
+
+It is important to distinguish the different questions that the theory
+and empirical analysis tackle. The theoretical limit shows the best
+that can be done by a perfect mutation strategy given the worst
+distribution of mutants one may encounter. On the other hand, the
+empirical analysis finds the average utility of a perfect
+strategy without regard to the distribution of mutants in different
+programs. However, given that the effects of skew were found to be
+rather weak (only
+\Sexpr{mean(u.agg.db$effectiveness - agg.db$effectiveness) * 100.0}\%)
+the theoretical bound is reasonable for the empirical question too.
+
+The empirical upper bounds on gain in utility are surprisingly low,
+and call into question the effort invested into improving mutation
+reduction strategies. Of course, one can still point out that random
+sampling is subject to the vagaries of chance, as one can get arbitrarily
+good or bad samples. However, our results suggest that the variance of
+individual samples is rather low, and the situation improves quite a
+bit with larger projects --- e.g. the variance of \emph{commons-math1}
+is just
+\Sexpr{sd(info.db[info.db$project=='commons-math1',]$effectiveness)*100}\%.
+Hence the chances for really bad samples are very low in the case of
+projects large enough to really need mutant reduction, and drop quickly
+as the number of test cases increases. One may wonder if the adequacy of
+test suites has an impact, but our analysis of projects with
+adequate test suites suggests that there is very little difference due
+to adequacy
+($U_{perfect} = $\Sexpr{mean(welltested$effectiveness)*100.0}\%).  In
+general, using accepted standard practices for statistical sampling to
+produce reasonably-sized random mutant samples should be practically
+effective for avoiding unusually bad results due to random chance.
+The added advantage is that random sampling is easy to implement and
+incurs negligible overhead.
+
+We note that our framework is applicable not only to selective mutation, but
+also to mutation implementors looking to add new mutators. 
+Say a mutation implementor has a perfect set of mutation operators such that
+their current set of mutants does not have any redundant mutants (practically
+infeasible given our shallow understanding of mutant semiotics). Even if we
+consider the addition of a new set of random mutants that \emph{do not} improve
+the mutation set at all, in that they are redundant with respect  to the original set
+(rare in practice, given that we are introducing new mutants), the maximum
+disadvantage thus caused is bounded by our limit
+(\Sexpr{u.agg.db.u$conf.int[2]*100}\% upper limit for 95\% of projects). However,
+at least a few of the new mutants can be expected to improve the representativeness
+of a mutation set compared to the possible faults. Since we can't bound the number of distinguishable
+mutants that may be introduced, there is no upper bound for the
+maximum advantage gained by adding new mutation operators.  Adding new
+operators is especially attractive in light of recent results showing
+classes of real faults that are not coupled to any of the operators
+currently in common use \cite{just2014mutants}.
+
+Our previous research~\cite{gopinath2015howhard}
+suggests that a constant number of mutants (a theoretical maximum of $9,604$,
+and 1,000 in practice for 1\% accuracy) is sufficient for computing
+mutation score with high accuracy
+irrespective of the total number of mutants. This suggests that sampling will
+lead to neither loss of effectiveness nor loss of accuracy, and hence addition
+of new mutation operators (and sampling the required number of mutants) is
+potentially a very fruitful endeavour.
+

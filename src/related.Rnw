@@ -1,0 +1,130 @@
+% vim : set spell :
+\section{Related Work}
+\label{sec:related}
+
+According to Mathur~\cite{mathur2012foundations}, the idea of mutation analysis was first proposed by Richard
+Lipton, and formalized by DeMillo et
+al.~\cite{demillo1978hints} A practical implementation of mutation analysis
+was done by Budd et al.~\cite{budd1980theoretical} in 1980.
+
+Mutation analysis subsumes different coverage
+measures~\cite{budd1980mutation,mathur1994empirical,offutt1996subsumption};
+the faults produced are
+similar to real faults in terms of the errors
+produced~\cite{daran1996software} and ease of
+detection~\cite{andrews2005mutation,andrews2006using}. Just et
+al.~\cite{just2014mutants} investigated the relation between mutation
+score and test case effectiveness using 357 real bugs, and found that
+the mutation score increased with effectiveness for 75\% of cases,
+which was better than the 46\% reported for structural coverage.
+
+Performing a mutation analysis is usually costly due to the large number of test runs
+required for a full analysis~\cite{jia2011analysis}.
+% This is one of the chief barriers to more widespread adoption of the technique.
+There are several approaches to reducing the cost of mutation
+analysis, categorized by Offutt and
+Untch~\cite{offutt2001mutation} as: do
+\textit{fewer}, do \textit{smarter}, and do \textit{faster}.  The
+\textit{do fewer} approaches include selective mutation and mutant
+sampling, while weak mutation, parallelization of mutation analysis,
+and space/time trade-offs are grouped under the umbrella of \textit{do
+smarter}. Finally, the \textit{do faster} approaches include mutant schema
+generation, code patching, and other methods.
+
+The idea of using only a subset of mutants was conceived along with
+mutation analysis itself. Budd~\cite{budd1980mutation} and
+Acree~\cite{acree1980mutation} showed that even 10\% sampling approximates the full mutation score with
+99\% accuracy. This idea was further
+explored by Mathur~\cite{mathur1991performance}, Wong et
+al.~\cite{wong1993mutation,wong1995reducing}, and Offutt et
+al.~\cite{offutt1993experimental} using Mothra~\cite{Mothra}
+for Fortran.
+
+A number of studies have looked at the relative merits of
+operator selection and random sampling criteria. Wong et
+al.~\cite{wong1995reducing} compared x\% selection of each mutant type
+with operator selection using just two mutation operators and found
+that both achieved similar accuracy and reduction (80\%).
+Mresa et al.\cite{mresa1999efficiency} used the cost of detection
+as a means of operator selection. They
+found that if a very high mutation score (close to 100\%) is required,
+x\% selective mutation is better than operator selection, and,
+conversely, for lower scores, operator selection would be better if
+the cost of detecting mutants is considered.
+
+Zhang et al.~\cite{zhang2010isoperator} compared operator-based mutant
+selection techniques to random sampling. They found that none of
+the selection techniques were superior to random sampling.
+They also found that uniform sampling is
+more effective for larger programs compared to strata sampling on operators\footnote{The authors choose a random operator, and then a mutant of that operator. This
+is in effect strata sampling on operators given equal operator priority.
+}, and the reverse is true for smaller programs.
+Recently, Zhang et al.~\cite{zhang2013operator} confirmed that sampling as
+few as 5\% of mutants is sufficient for a very high correlation (99\%) with
+the full mutation score, with even fewer mutants having a good potential for
+retaining high accuracy. They investigated eight sampling
+strategies on top of operator-based mutant selection and found that sampling
+strategies based on program components (methods in particular) performed best.
+
+Some studies have tried to find a set of \emph{sufficient mutation
+operators} that reduce the cost of mutation but maintain correlation
+with the full mutation score. Offutt et
+al.~\cite{offutt1993experimental} suggested an $n$-selective approach
+with step-by-step removal of operators that produce the most numerous
+mutations. Barbosa et al.\cite{barbosa2001toward} provided a set of
+guidelines for selecting such mutation operators. Namin et
+al.\cite{namin2006finding,siami2008sufficient} formulated the problem
+as a variable reduction problem, and found that just 28 out of 108
+operators in Proteum were sufficient for accurate results.
+
+Using only the statement
+deletion operator was first suggested by
+Untch~\cite{untch2009onreduced}, who found that it had the highest
+correlation ($R^2 = 0.97$) with the full mutation score compared to
+other operator selection methods, while generating the smallest number
+of mutants.  This was further reinforced by Deng et
+al.~\cite{deng2013empirical} who defined deletion for different
+language elements, and found that an accuracy of 92\% is achieved
+while reducing the number of mutants by 80\%.
+
+A similar mutation reduction strategy is to cluster similar mutations
+together~\cite{hussain2008mutation,derezinska2015toward}, which has been
+attempted based on domain analysis~\cite{ji2009anovel} and machine
+learning techniques based on graphs~\cite{strug2012machine}.
+
+In operator and mutant subsumption, operators or mutants that
+do not significantly differ from others are eliminated. Kurtz et
+al.~\cite{kurtz2014mutant} found that a reduction of up to 24 times can be
+achieved using subsumption alone, even though the result is based on
+an investigation of a single program, \texttt{cal}. Research into
+subsumption of mutants also includes Higher Order Mutants (HOM), whereby
+multiple mutations are introduced into the same set of mutants,
+reducing the number of individual mutants by subsuming
+component mutants. HOMs were investigated by Jia et
+al.~\cite{jia2009higher,jia2008constructing}, who found that they can
+reduce the number of mutants by 50\%.
+
+Ammann et al.~\cite{ammann2014establishing} observe that the set of minimal
+mutants corresponding to a minimal test suite has the same cardinality as
+the test suite, and provides a simple algorithm for finding both a minimal test
+suite and a corresponding minimal mutant set.  Their work also suggests
+this minimal mutant set as a way to evaluate the quality of a mutation
+reduction strategy. Finally, Ammann et al. also found that the particular
+strategies examined are rather poor when it comes to selecting representative
+mutants. Our work is an extension of Ammann et al.~\cite{ammann2014establishing}
+in that we provide a theoretical and empirical bound to the amount of
+improvement that can be expected by \emph{any} mutation reduction strategy.
+
+In comparison with previous work~\cite{zhang2010isoperator,zhang2013operator}
+our analysis is backed by theory and compares random sampling to the \emph{limit of
+selection}. That is, the results from our study are applicable to techniques
+such as clustering using static analysis, and even improved strata sampling
+techniques. Further, we are the first to evaluate the effectiveness of non-adequate
+test suites (Zhang et al.~\cite{zhang2013operator} evaluates only the predictive
+power of non-adequate test suites, not effectiveness). Finally, previous
+research~\cite{zhang2010isoperator,zhang2013operator} does not compare the
+effectiveness of the \emph{same number} of mutants for sampling and operator
+selection, but rather different operator-selections with samples of increasing
+size such as 5\%, 10\% etc.
+We believe that practitioners will be more interested in comparing the
+effectiveness achieved by the same numbers of mutants.

@@ -1,0 +1,7 @@
+<<umutantdist, out.width='.95\\linewidth', echo=F, message=F, warn=F,fig.lp="fig:">>=
+u.info.db$project <- with(u.info.db, reorder(project, best.mintc))
+ggplot(u.info.db, aes(x=project, y=utility)) + geom_boxplot() + theme_classic() +
+  theme( axis.text.x=element_blank()) +
+  labs(title="Utility Distribution of Distinguished Mutants", x="Projects", y="Maximum Utility") +
+  geom_hline(aes(yintercept=mean(u.info.db$utility), color='red'))
+@

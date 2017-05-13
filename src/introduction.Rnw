@@ -1,0 +1,146 @@
+\section{Introduction}
+\label{sec:introduction}
+
+The quality of software is a pressing concern for the software industry,
+and is usually determined by comprehensive testing. However, tests are
+themselves programs, (usually) written by human beings, and their quality
+needs to be monitored to ensure that they in fact are useful in
+ensuring software quality (e.g., it is important to determine if the
+tests are also a quality software system).
+
+Mutation analysis~\cite{lipton1971fault,budd1979mutation} is currently the
+recommended method~\cite{andrews2006using} for evaluating the efficacy
+of a test suite. It involves systematic transformation of a program
+through the introduction of small syntactical changes, each of which is
+evaluated against the given test suite. A mutant that can be
+distinguished from the original program by the test suite is deemed to
+have been \emph{killed} by the test suite, and the ratio of all such
+mutants to the set of mutants identified by a
+test suite is its mutation (kill) score, taken as an
+effectiveness measure of the test suite.
+
+Mutation analysis has been validated many times in the past. Andrews et
+al.~\cite{andrews2005mutation,andrews2006using}, and more recently
+Just et al.~\cite{just2014mutants}, found that faults generated
+through mutation analysis resemble real bugs, their ease of detection
+is similar to that of real faults, and most importantly for us, a
+test suite's effectiveness against mutants is similar to its
+effectiveness against real faults.
+
+However, mutation analysis has failed to gain widespread adoption in software
+engineering practice due to its substantial computational requirements
+--- the number of mutants generated needs to be many times the number
+of program tokens in order to achieve exhaustive coverage of even first order mutants
+(involving one syntactic change at a time), and each mutant needs to be
+evaluated by a potentially full test suite run.
+A number of strategies
+have been proposed to deal with the computational cost of mutation analysis.
+These have been classified~\cite{offutt2001mutation} orthogonally into
+\emph{do faster}, \emph{do smarter}, and \emph{do fewer} approaches,
+corresponding to whether they improve the speed of execution of a single mutant,
+parallelize the evaluation of mutants, or reduce the number of
+mutants evaluated.
+
+A large number of \emph{do fewer} strategies --- mutation reduction
+methods that seek to intelligently choose a smaller, representative, set
+of mutants to evaluate --- have been
+investigated in the past. They are broadly divided into operator
+selection strategies, which seek to identify the smallest subset of
+mutation operators that generate the most useful
+mutants~\cite{offutt1993experimental,schuler2009javalanche}, and
+strata sampling~\cite{acree1980mutation,budd1980mutation} techniques,
+which seek to identify groups of mutants that have high similarity
+between them to reduce the number of mutants while maintaining
+representativeness and diversity~\cite{zhang2010isoperator,zhang2013operator}. Even more
+complex methods using clustering~\cite{derezinska2013aquality,ma2016mutation}, static
+analysis~\cite{ji2009anovel,kurtz2015static} and other intelligent
+techniques~\cite{strug2012machine} are under active
+research~\cite{derezinska2015toward}.
+
+These efforts raise an important question: What is the actual effectiveness
+of a perfect mutation reduction strategy over the baseline -- random
+sampling -- given any arbitrary program?
+
+\greybox{We define the \textbf{efficiency} of a selection technique as the
+amount of reduction achieved, and the \textbf{effectiveness} as the selection
+technique's ability to choose a representative reduced set of mutants, that
+require as many test cases to kill as the original set of mutants.
+The ratio of effectiveness of a technique to that of random sampling is taken
+as the \textbf{utility} of the technique.}
+
+We approach these questions from two directions. First, we consider a simple
+theoretical framework in which to evaluate the improvement in
+effectiveness for the best mutation reduction possible, using a few simplifying
+assumptions, and given oracular knowledge of mutation kills. This helps set the base-line.
+Second, we empirically evaluate the best mutation reduction possible for a
+large number of projects, given post hoc (that is, oracular) detection
+knowledge. This gives us practical (and optimistic) limits given common
+project characteristics.
+
+Our contributions are as follows:
+\begin{itemize}
+\item We find a theoretical upper limit for the effectiveness of mutation
+reduction strategies of $58.2$\% for a uniform distribution of mutants --- the
+distribution most favorable for random sampling. We later show that for real
+world programs, the impact of distribution is very small
+(\Sexpr{mean(u.agg.db$effectiveness - agg.db$effectiveness)*100}\%) suggesting
+that uniform distribution is a reasonable approximation.
+\item We find an empirical upper limit for effectiveness through the evaluation
+of a large number of open source projects, which
+suggests a maximum practical utility of
+\Sexpr{mean(agg.db$effectiveness)*100}\% on average, and for 95\% of projects, a
+maximum utility between \Sexpr{agg.db.u$conf.int[1]*100}\% and
+\Sexpr{agg.db.u$conf.int[2]*100}\% (\emph{one sample u-test} $p <
+0.001$)\footnote{We use the non-parametric Mann-Whitney \emph{u-test}
+  as it is more robust to normality assumption, and to outliers. We note that a \emph{t-test} also gives similar results.
+}.
+\item We show that even if we consider a set of mutants that
+are distinguished by at least by one test (thus discounting the impact of skew in
+redundant mutants) we can expect a maximum utility of \Sexpr{mean(u.agg.db$effectiveness)*100}\% on average,
+and for 95\% of projects, a maximum utility between \Sexpr{u.agg.db.u$conf.int[1]*100}\% and \Sexpr{u.agg.db.u$conf.int[2]*100}\% (\emph{one sample u-test} $p < 0.001$).
+\end{itemize}
+
+What do our results mean for the future of mutation reduction
+strategies? Any advantage we gain
+over random sampling is indeed an advantage, however small. However,
+our understanding of mutant semiotics\footnote{Here semiotics is the relation between a syntactic change and its semantic impact.}
+is as yet imperfect, and insufficient to infer whether the kind of
+selection employed is advantageous. In fact, our current
+research~\cite{gopinath2015domutation} shows that current operator
+selection strategies seldom provide any advantage over random sampling,
+and even strata sampling based on program elements never achieves more
+than a 10\% advantage over pure random sampling.
+Our results suggest that the
+effort spent towards improving mutant selection mechanisms should be
+carefully weighed against the potential maximum utility, and the risks
+associated with actually making things worse through biased sampling.
+
+Our research is also an endorsement of the need for further research
+into new mutators. It suggests that addition of new mutators and then randomly
+sampling the same number of mutants as that of the original set, is only subject to
+a similar maximum disadvantage ($\frac{\Sexpr{u.agg.db.u$conf.int[2]}\times 100}{1 - \Sexpr{u.agg.db.u$conf.int[2]}}$ = \Sexpr{u.agg.db.u$conf.int[2]*100/(1 - u.agg.db.u$conf.int[2])}\% upper limit for 95\%
+projects), while having essentially \emph{no upper bound} on advantage due to
+increase in effectiveness.
+
+The asymmetry between improvement obtained by operator removal
+and operator addition is caused by the difference in population
+from which the random comparison sample is drawn. For operator
+selection, the perfect set remaining after removal of operators
+is a subset of the original population. Since the random sample
+is drawn from the original population, it can potentially contain
+a mutant from each strata in the perfect set. For operator addition,
+the new perfect set is a superset of the original population, with
+as many new strata as there are new mutants (no bounds on the number of new
+strata). Since the random sample is constructed from the original
+population, it does not contain the newly added strata.
+
+\greybox{
+Our results suggest a higher payoff in \textbf{finding newer categories} of
+mutations, than in trying to reduce the mutation operators already available.
+}
+In the interests of easy replication, our research is organized and
+reproducible using \emph{Knitr}. The raw \emph{Knitr} source of our
+paper along with the \emph{R} data set required to build the paper, and the
+instructions to do so, are available~\cite{limitsdata}.
+
+

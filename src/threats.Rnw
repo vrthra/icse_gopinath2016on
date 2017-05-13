@@ -1,0 +1,38 @@
+\section{Threats to Validity}
+\label{sec:threats}
+
+While we have taken care to ensure that our results are unbiased, and
+have tried to eliminate the effects of random noise. Random noise can
+result from non-representative choise of project, tool, or language,
+and can lead to skewed strata and bias in empirical result.
+Our results are subject to the following threats.
+
+\noindent\textbf{Threats due to approximation:} We use the greedy algorithm
+due to Chvatal~\cite{chvatal1979agreedy} for approximating the minimum test
+suite size. While this is guaranteed to be $H(|M|)$ approximate, there is
+still some scope for error. We guard against this error by taking the average
+of $100$ runs for each observation. Secondly, we used random samples to
+evaluate the effectiveness of random sampling. While we have used $100$ trials
+each for each observation, the possibility of bias does exist.
+
+\noindent\textbf{Threats due to sampling bias:} To ensure representativeness
+of our samples, we opted to use search results from the Github repository
+of Java projects that use the {\tt Maven} build system. We picked \emph{all}
+projects that we could retrieve given the Github API, and selected from these
+only based on constraints of building and testing. However, our sample of
+programs could be biased by skew in the projects returned by Github.
+
+\noindent\textbf{Bias due to tool used:} For our study, we relied on PIT.
+We have done our best
+to extend PIT to provide a reasonably sufficient set of mutation operators,
+ensuring also that the mutation operators are non-redundant. Further, we
+have tried to minimize the impact of redundancy by considering the effect of
+distinguished mutants.
+There is still a possibility that the kind of mutants produced
+may be skewed, which may impact our analysis. Hence, this study needs to be
+repeated with mutants from diverse tools and projects in future.
+
+% To ensure that our study can be replicated easily with different data sources, 
+% we have published our empirical observations from PIT as an \emph{R} package,
+% and the computations producing the paper as a \emph{Knitr}~\cite{xie2013dynamic}
+% document. The complete research, along with instructions to build it, is available~\cite{limitsdata}.

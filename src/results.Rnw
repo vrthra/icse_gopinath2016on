@@ -1,0 +1,165 @@
+\begin{figure}
+<<mintc.fig2, fig.height=4, child='fig.efftc.Rnw'>>=
+@
+\caption{The figure plots utility (y-axis) against the average minimal test suite
+size (log10). Bubble size represents the magnitude of detected mutants (log10).
+The figure suggests that there
+is no correlation between utility and average minimal test suite size.}
+\label{fig:efftc}
+\end{figure}
+
+
+\begin{figure}
+<<effmutants.fig3,fig.height=4,  child='fig.effmutants.Rnw'>>=
+@
+\caption{The figure plots utility (y-axis) against the number of detected mutants.
+Bubble size represents the magnitude of average minimal test suite size (log10).
+The figure suggests that there is no correlation between utility and number of detected mutants.}
+\label{fig:effmut}
+\end{figure}
+
+
+
+\begin{table*}[!htb]
+    \begin{minipage}{.5\linewidth}
+\caption{The maximum utility achievable by a perfect strategy for each project}
+      \centering
+\resizebox{0.9\columnwidth}{!}{%
+<<tbl:results, results='asis'>>=
+t <- subset(agg.db, select=c('project', 'det.mutants', 'sample.mintc_mutant', 'utility'))
+
+levels(t$project) <- c(levels(t$project), "commons-math1-l10n")
+t$project[t$project == 'commons-math_l10n'] <- 'commons-math1-l10n'
+colnames(t) <-  c('$Project$', '$|kill(T,M)|$', '$|kill(T_r,M)|$', '$U_{perf}$')
+print(xtable(t, label='tbl:results', caption='Results'), include.rownames = F, floating=F,
+  sanitize.text.function=function(x){x})
+@
+}
+\label{tbl:results}
+    \end{minipage}%
+    \begin{minipage}{.5\linewidth}
+\caption{The maximum utility achievable by a perfect strategy for each project using distinguishable mutants}
+      \centering
+\resizebox{0.9\columnwidth}{!}{%
+<<tbl:uresults, results='asis'>>=
+t <- subset(u.agg.db, select=c('project', 'det.mutants', 'sample.mintc_mutant', 'utility'))
+
+levels(t$project) <- c(levels(t$project), "commons-math1-l10n")
+t$project[t$project == 'commons-math_l10n'] <- 'commons-math1-l10n'
+colnames(t) <-  c('$Project$', '$|kill(T,M)|$', '$|kill(T_r,M)|$', '$U_{perf}$')
+print(xtable(t, label='tbl:uresults', caption='Results'), include.rownames = F, floating=F,
+  sanitize.text.function=function(x){x})
+@
+}
+\label{tbl:uresults}
+    \end{minipage} 
+\end{table*}
+
+
+
+\section{Results}
+\label{sec:results}
+
+\subsection{All Mutants}
+Our results are given in Table~\ref{tbl:results}. We found that the largest utility achieved
+by the perfect strategy was \Sexpr{max(agg.db$utility)*100}\%, for project \emph{\Sexpr{subset(agg.db,utility == max(agg.db$utility))$project}}, while the lowest utility was
+\Sexpr{min(agg.db$utility)*100}\%, for project \emph{\Sexpr{subset(agg.db,utility == min(agg.db$utility))$project}}.  The mean utility of the perfect strategy was \Sexpr{mean(agg.db$effectiveness)*100}\%.
+A one sample \emph{u-test} suggests that 95\% of
+projects have maximum utility between \Sexpr{agg.db.u$conf.int[1]*100}\% and \Sexpr{agg.db.u$conf.int[2]*100}\% ($p < 0.001$).  The distribution of utility for each project is captured in Figure~\ref{fig:effdist}. Projects
+are sorted by average minimal test suite size.
+
+\begin{figure*}[!htb]
+    \begin{minipage}{.5\linewidth}
+      \centering
+<<effdist,fig.height=5,  child='fig.effdist.Rnw'>>=
+@
+\caption{Using all mutants.}
+\label{fig:effdist}
+    \end{minipage}%
+    \begin{minipage}{.5\linewidth}
+      \centering
+<<ueffdist,fig.height=5,  child='fig.ueffdist.Rnw'>>=
+@
+\caption{Using distinguished mutants.}
+\label{fig:ueffdist}
+    \end{minipage} 
+\caption*{Distribution of mean utility using distinguished mutants across projects. The projects are ordered by the cardinality of mean minimal test suite. The red line indicates the mean of all observations.}
+\end{figure*}
+
+
+One may wonder if the situation improves with either test suite size or project
+size.
+\begin{table}
+\centering
+\caption{The correlation of utility for all mutants, killed mutants, mutation score, and minimal test suite size, based on
+both full set of mutants, and also considering only distinguished mutants}
+<<tblcorr1, results='asis'>>=
+df <- data.frame(rsq1=numeric(0), rsq2=numeric(0))
+df['$M$',] <- c(
+  summary(lm(utility~all.mutants, data=agg.db))$adj.r.squared,
+  summary(lm(utility~all.mutants, data=u.agg.db))$adj.r.squared)
+df['$M_{kill}$',] <- c(
+  summary(lm(utility~det.mutants, data=agg.db))$adj.r.squared,
+  summary(lm(utility~det.mutants, data=u.agg.db))$adj.r.squared)
+df['$M_{kill}/M$',] <- c(
+  summary(lm(utility~muscore, data=agg.db))$adj.r.squared,
+  summary(lm(utility~muscore, data=u.agg.db))$adj.r.squared)
+# T^min == M^min
+df['$T^{min}$',] <- c(
+  summary(lm(utility~best.mintc, data=agg.db))$adj.r.squared,
+  summary(lm(utility~best.mintc, data=u.agg.db))$adj.r.squared)
+colnames(df) <- c('$R^2_{all}$','$R^2_{distinguished}$')
+print(xtable(df, label='tbl:corr1', caption='Correlation Factors'), include.rownames = T, floating=F, sanitize.text.function=function(x){x})
+@
+\label{tbl:corr1}
+\end{table}
+We note that the utility $U_{p}$ has low correlation with total mutants, detected mutants (shown in Figure~\ref{fig:effmut}), mutation score, and minimal test suite size (shown in Figure~\ref{fig:efftc}). The correlation factors are given in Table~\ref{tbl:corr1}.
+
+An analysis of variance (ANOVA) to determine significant variables affecting $U_{perfect}$
+suggests that the variability due to project is a significant factor
+($p < 0.001$) and interacts with $kill(T_{random}, M)$ strongly.
+\[
+\mu\{U_{p}\} = project + kill(T_{r},M) + project\times kill(T_{r},M)
+\]
+The variable \emph{project} has a correlation of \Sexpr{summary(lm(utility~project, data=info.db))$r.squared} with the $U_{perfect}$,
+and the combined terms have a correlation of $0.9995$ with $U_{perfect}$.
+
+\subsection{Distinguishable Mutants}
+
+Our results are given in Table~\ref{tbl:uresults}. We found that the largest utility achieved
+by the perfect strategy was \Sexpr{max(u.agg.db$utility)*100}\%, for project \emph{\Sexpr{subset(u.agg.db,utility == max(u.agg.db$utility))$project}}, while the lowest utility was
+\Sexpr{min(u.agg.db$utility)*100}\%, for project \emph{\Sexpr{subset(u.agg.db,utility == min(u.agg.db$utility))$project}}.
+
+The mean utility of the perfect strategy was \Sexpr{mean(u.agg.db$effectiveness)*100}\%.
+A one sample \emph{u-test} showed that 95\% of
+projects have a maximum utility between \Sexpr{u.agg.db.u$conf.int[1]*100}\% and \Sexpr{u.agg.db.u$conf.int[2]*100}\% ($p < 0.001$).
+
+The utility distribution for each project is captured in Figure~\ref{fig:ueffdist}. The projects
+are sorted by the average minimal test suite size.
+
+This situation does not change with either test suite or project size.
+
+The utility $U_{p}$ has low correlation with total mutants, detected mutants, mutation score, and minimal test suite size. The correlation factors are given in Table~\ref{tbl:corr1}.
+
+An analysis of variance (ANOVA) to determine significant variables affecting $U_{perfect}$
+found that the variability due to project is a significant factor
+($p < 0.001$) and strongly interacts with $kill(T_{random}, M)$.
+\[
+\mu\{U_{p}\} = project + kill(T_{r},M) + project\times kill(T_{r},M)
+\]
+The variable \emph{project} has a correlation of \Sexpr{summary(lm(utility~project, data=u.info.db))$r.squared} with the $U_{perfect}$,
+and the combined terms have a correlation of $0.9994$ with $U_{perfect}$.
+
+\subsection{Adequate Mutants}
+Finally, one may ask if adequacy has an impact on the effectiveness of selection strategies. Following the industry
+practice of deeming well-tested projects adequate after discounting equivalent
+mutants~\cite{zhang2013operator,siami2008sufficient,zhang2010isoperator,zhang2014empirical}, we chose
+large well tested projects that had at least $10,000$ mutants and a mutation score
+of at least $70\%$ (in the range of similar studies above) which were deemed adequate.
+%\footnote{See footnote 8}
+We evaluated the utility for \emph{\Sexpr{rownames(welltested)}} and found
+that they have a mean maximum utility of \Sexpr{mean(welltested$utility)*100.0}\%.
+These same projects have a distinguished mean maximum utility of 
+ \Sexpr{mean(u.welltested$utility)*100.0}\%. This suggests that adequacy does not have a
+noticeable impact on the effectiveness of selection strategies.
+

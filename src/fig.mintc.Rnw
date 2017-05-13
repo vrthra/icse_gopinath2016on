@@ -1,0 +1,6 @@
+<<mintc.fig, out.width='.95\\linewidth', echo=F, message=F, warn=F,fig.lp="fig:">>=
+info.db$project <- with(info.db, reorder(project, best.mintc))
+ggplot(info.db, aes(x=project, y=best.mintc)) + geom_boxplot() + theme_classic() +
+  theme( axis.text.x=element_blank()) +
+  labs(title="MinTC Distribution", x="Projects", y="MinTC")
+@

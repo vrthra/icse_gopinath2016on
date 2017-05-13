@@ -1,0 +1,73 @@
+\usepackage{cite}
+\usepackage{float}
+\usepackage{Sweavel}
+\usepackage{placeins}
+\usepackage{xspace}
+
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+
+% Define the title here
+\input{title}
+
+\usepackage[bookmarks=false, urlcolor=blue, linkcolor=blue, citecolor=blue, colorlinks=true, pdftitle={\mytitle}, pdfauthor={Rahul Gopinath}]{hyperref}
+%\usepackage[center]{caption}
+%\linespread{2}
+\usepackage{comment}
+
+\usepackage{listings}
+\usepackage{float}
+\floatstyle{plain}
+\newfloat{program}{t}{lop}
+\floatname{program}{Figure}
+\usepackage{color}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+%\lstset{frame=tb,
+%  language=Java,
+%  aboveskip=3mm,
+%  belowskip=3mm,
+%  showstringspaces=false,
+%  columns=flexible,
+%  basicstyle={\small\ttfamily},
+%  numbers=left,
+%  numberstyle=\tiny\color{gray},
+%  keywordstyle=\color{blue},
+%  commentstyle=\color{dkgreen},
+%  stringstyle=\color{mauve},
+%  breaklines=true,
+%  breakatwhitespace=true
+%  tabsize=3
+%}
+
+%\newcounter{observation}
+%\newcommand{\observation}[1]{\refstepcounter{observation}
+ 
+%\begin{center}
+%\noindent\Ovalbox{
+%\begin{minipage}{0.93\columnwidth}
+%\textbf{Observation \arabic{observation}:} #1
+%\end{minipage}
+%}
+%\end{center}
+%\vspace{-5pt}
+%}
+
+%\setlength{\intextsep}{0mm}
+%\setlength{\belowcaptionskip}{1mm}
+
+\usepackage{color}
+\definecolor{lightgray}{gray}{0.75}
+
+\newcommand\greybox[1]{%
+  \vskip\baselineskip%
+  \par\noindent\colorbox{lightgray}{%
+    \begin{minipage}{0.99\columnwidth}#1\end{minipage}%
+  }%
+  \vskip\baselineskip%
+}

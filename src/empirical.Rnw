@@ -1,0 +1,272 @@
+% vim: set spell :
+<<pitop, child="tbl.pitmut.Rnw" >>=
+@
+\section{Empirical Analysis}
+\label{sec:empirical}
+
+The above analysis provides a theoretical framework for evaluating the advantage a
+sampling method can have over random sampling, with a set of mutants
+and test suite constructed with simplifying assumptions. It also gives us
+an expected limit for how good these techniques could get for a uniform
+distribution of mutants. However, in
+practice, it is unlikely that real test suites and mutant sets
+meet our assumptions. What advantage can we expect to gain
+with real software systems, even if we allow our hypothetical method to make use of
+prior knowledge of the results of mutation analysis?  To find out, we
+examine a large set of real-world programs and their test suites.
+
+Our selection of sample programs for this empirical study
+of the limits of mutation reduction was driven by a few overriding concerns. Our primary
+requirement was that our results should be as representative as possible
+of real-world programs. Second, we strove for a statistically significant result,
+therefore reducing the number of variables present in the experiments for
+reduction of variability due to their presence.
+
+\begin{figure}
+<<dist.fig2, fig.height=4, out.width='.95\\linewidth', echo=F, message=F, warn=F,fig.lp="fig:">>=
+agg.db$Tests <- agg.db$best.origtc
+ggplot(agg.db, aes(x=all.mutants, y <- muscore)) +
+  geom_point(color="blue", shape=1, aes(size=log10(Tests))) + theme_classic() +
+  scale_x_log10(labels=comma) +
+  theme(legend.position=c(0.85,0.35)) +
+  labs(title="Projects", x="Mutants", y="Mutation Score")
+@
+\caption{Distribution of number of mutants and test suites. It shows that we have
+a reasonable non-biased sample with both large programs with high mutation scores, and also
+small low scoring projects.}
+\label{fig:mutants}
+\end{figure}
+
+We chose a large random sample of Java projects from
+Github~\cite{github}\footnote{Github allows us access only a subset of
+projects using their search API. We believe this should not confound our
+results.} and the Apache Software Foundation~\cite{apache} that use the
+popular Maven~\cite{maven} build system. From an initial $1,800$ projects,
+we eliminated aggregate projects, and projects without test suites, which
+left us with $796$ projects. Out of these, $326$ projects compiled (common
+reasons for failure included unavailable dependencies, compilation errors due
+to syntax, and bad configurations). Next, projects that did not pass their own
+test suites were eliminated since the analysis requires a passing test suite.
+Tests that timed out for particular mutants were assumed to have not detected
+the mutant. The tests that completely failed to detect any of the mutants
+were eliminated as well, as these were redundant to our analysis.
+We also removed all projects with trivial test suites, leaving only those
+that had at least \Sexpr{my_origtc} test cases.
+This left us with \Sexpr{nrow(agg.db)} projects.
+The projects are given in Table~\ref{tbl:mutants}.
+
+%We note that our selection of \Sexpr{nrow(x)} projects
+%with mean \Sexpr{mean(cloc$cloc)} LOC, a mean mutation score
+%\Sexpr{mean(x$score/100.0)}, and mean \Sexpr{mean(x$best.origtc)} tests
+%compare favorably with previous studies in this field. For example,
+%Namin et al.~\cite{siami2008sufficient} has test suites with mean 3115 test cases
+%(sd 3115.286), but uses a total of 7 subjects with an average
+%LOC 312, and a mean mutation score of 0.32 (sd 0.318).
+%Zhang et al. ~\cite{zhang2010isoperator} has test suites with mean 3115 test cases
+%(sd 3115.286), but uses a total of 7 subjects with an average
+%LOC 312, and a mean mutation score of 0.83 (sd 0.055).
+%Zhang et al. ~\cite{zhang2013operator} has test suites with mean 748 test cases
+%(sd 748.636), but uses a total of 11 subjects with an average
+%LOC 15083, and a mean mutation score of 0.44 (sd 0.251).
+%Zhang et al. ~\cite{zhang2014empirical} has test suites with mean 81 test cases
+%(sd 81), but uses a total of 12 subjects with an average LOC
+%6209, and a mean mutation score of 0.52 (sd 0.256).
+
+
+% ---------------------------------
+
+\begin{comment}
+% TODO - Add this if there is space.
+Note that we have a much larger set of large projects (\Sexpr{nrow(subjects)} projects with a mean \Sexpr{as.integer(mean(subjects$cloc))} LOC) than
+previous studies such as
+Namin et al.~\cite{siami2008sufficient} (\Sexpr{nrow(siami2008sufficient)} projects with a mean \Sexpr{as.integer(mean(siami2008sufficient$nloc))} LOC),
+Zhang et al.~\cite{zhang2010isoperator} (\Sexpr{nrow(zhang2010isoperator)} projects with a mean \Sexpr{as.integer(mean(zhang2010isoperator$nloc))} LOC),
+Zhang et al.~\cite{zhang2013operator} (\Sexpr{nrow(zhang2010isoperator)} projects with a mean \Sexpr{as.integer(mean(zhang2013operator$nloc))} LOC), and
+Zhang et al.~\cite{zhang2014empirical} (\Sexpr{nrow(zhang2014empirical)} projects with a mean \Sexpr{as.integer(mean(zhang2014empirical$nloc))} LOC).
+
+Similarly, our test suites are at least comparable to other studies, (mean=\Sexpr{mean(subjects$best.origtc)} test cases, sd=\Sexpr{sd(subjects$best.origtc)}) compared to previous studies ---
+Namin et al.~\cite{siami2008sufficient} (mean=\Sexpr{mean(siami2008sufficient$tests)}, sd=\Sexpr{sd(siami2008sufficient$tests)}),
+Zhang et al.~\cite{zhang2010isoperator} (mean=\Sexpr{mean(zhang2010isoperator$tests)}, sd=\Sexpr{sd(zhang2010isoperator$tests)}),
+Zhang et al.~\cite{zhang2013operator} (mean=\Sexpr{mean(zhang2010isoperator$tests)}, sd=\Sexpr{sd(zhang2010isoperator$tests)}), and
+Zhang et al.~\cite{zhang2014empirical} (mean=\Sexpr{mean(zhang2014empirical$tests)}, sd=\Sexpr{sd(zhang2014empirical$tests)}).  
+
+In terms of mutation scores, our sample (mean=\Sexpr{mean(subjects$score/100)}, sd=\Sexpr{sd(subjects$score/100)}),
+% and \emph{Apache commons-math} in the second part with mutation score $0.74$,
+is also comparable to previous studies such as
+Namin et al.~\cite{siami2008sufficient} (mean=\Sexpr{mean(siami2008sufficient$muscore)}, sd=\Sexpr{sd(siami2008sufficient$muscore)}),
+Zhang et al.~\cite{zhang2010isoperator} (mean \Sexpr{mean(zhang2010isoperator$muscore)}, sd=\Sexpr{sd(zhang2010isoperator$muscore)}),
+Zhang et al.~\cite{zhang2013operator} (mean \Sexpr{mean(zhang2010isoperator$muscore)}, sd=\Sexpr{sd(zhang2010isoperator$muscore)}), and
+Zhang et al.~\cite{zhang2014empirical} (mean \Sexpr{mean(zhang2014empirical$muscore)}, sd=\Sexpr{sd(zhang2014empirical$muscore)}). 
+In summary, our set of projects is fairly large, has large test suites, and
+has comparable mutation scores to previous studies that handled similar
+sized projects. Other studies of a similar nature had either smaller
+test suites, smaller sized subjects, or a much smaller number of subjects.
+Further, our study includes both low and high mutation scores,
+as required to demonstrate the effectiveness of our technique.
+\end{comment}
+
+% ----------------------------------
+
+
+
+\begin{figure}
+\includegraphics[width=0.45\textwidth]{fig/subsumption.pdf}
+\caption{Subsumption rate between operators. Note that subsumption is not a symmetrical relation.
+No operators come close to full subsumption.
+This suggests that \textbf{none of the operators studied are redundant}.}
+\label{fig:subsumption}
+\end{figure}
+
+We used PIT~\cite{pitest} for our analysis. PIT was extended to provide
+operators that it was lacking~\cite{ammann2015keynote} (accepted into mainline).
+We also ensured that the final operators (Table~\ref{tbl:pitop}) were not redundant.
+The redundancy matrix for the full operator set is given in Figure~\ref{fig:subsumption}.
+A mutant \emph{m1} is deemed to subsume
+another, say \emph{m2} if any tests
+that kills \emph{m1} is guaranteed to kill \emph{m2}. This is extended to
+mutation operators whereby the fraction of mutants in \emph{o1} killed by
+test cases that kills all mutants in \emph{o2} is taken as the degree of
+subsumption of \emph{o1} by \emph{o2}.
+The matrix shows that the maximum subsumption
+was just $43\%$ --- that is, none of the operators were redundant. 
+For a detailed description of each mutation operator, please refer to the
+PIT documentation~\cite{pitmut}.
+To remove the effects of random
+noise, results for each criteria were averaged over ten runs.
+The mutation scores along with the sizes of test suites are given in Figure~\ref{fig:mutants}.
+
+\begin{table}
+\caption{The projects mutants and test suites}
+\resizebox{\columnwidth}{!}{%
+<<tbl:mutants, results='asis'>>=
+t <- subset(agg.db, select=c('project', 'all.mutants', 'det.mutants', 'udet.mutants', 'best.origtc', 'best.mintc'))
+levels(t$project) <- c(levels(t$project), "commons-math1-l10n")
+t$project[t$project == 'commons-math_l10n'] <- 'commons-math1-l10n'
+colnames(t) <-  c('$Project$','$|M|$', '$M_{killed}$', '$M_{killed}^{uniq}$', '$|T|$', '$|T_{min}|$')
+print(xtable(t, label='tbl:results', caption='Results'), include.rownames = F, floating=F,
+  sanitize.text.function=function(x){x})
+@
+}
+\label{tbl:mutants}
+\end{table}
+
+It is of course possible that our results may be biased by the
+mutants that PIT produces, and it may be argued that the tool we use
+produces too many redundant mutants, and hence the results may not be
+applicable to a better tool that reduces the redundancy of mutants. To
+account for this argument, we run our experiment in two parts, with
+similar procedures but with different mutants. For the first part, we
+use the detected mutants from PIT as is, which provides us with an
+upper bound that a practicing tester can expect to experience, now,
+using an industry-accepted tool. For the second part, we choose only
+distinguishable mutants~\cite{ammann2014establishing} from the
+original set of detected mutants. What this does is to reduce the number
+of samples from each stratum to 1, and hence eliminate the skew in mutant
+population. Note that this requires post-hoc
+knowledge of mutant kills (not just that the mutants produce different
+failures, but also that \emph{available} tests in the suite can distinguish between
+both), and is the best one can do for the given projects to enhance
+the utility of any strategy against random sampling. We provide results
+for both the practical and more theoretically interesting
+distinguishable sets of mutants. Additionally, in case adequacy has an impact,
+we chose the projects that had plausible mutation-adequate test suites,
+and computed the possible advantage separately.
+
+\subsection{Experiment}
+\label{ssec:experiment}
+
+Our task is to find the $U_{perfect}$ for each project. The requirements for
+a perfect strategy are simple:
+\begin{enumerate}
+\item The mutants should be representative of the full set. That is,
+\[
+kill(T_{p},M) = kill(T,M)
+\]
+\item The mutants thus selected should be non-redundant. That is,
+\[
+\forall_{m \in M_{p}} kill(T_{p}, M_{p} \setminus \{m\})\subset kill(T_{p}, M_{p})
+\]
+\end{enumerate}
+The minimal mutant set suggested by Ammann et al.~\cite{ammann2014establishing}
+satisfies our requirements for a perfect strategy, since it is representative ---
+a test suite that can kill the minimal mutants can kill the entire set of mutants
+--- and it is non-redundant with respect to the corresponding minimal
+test suite.
+
+Ammann et al.~\cite{ammann2014establishing} observed that the cardinality of a
+minimal mutant set is the same as the cardinality of the corresponding minimal test
+suite. That is,
+\[
+|M_{perfect}^{min}| = |MinTest(T, M)| = |T^{min}_{all}|
+\]
+% note this is not cover(T^{min}, M), because the T^{min} can kill all in M
+Finding the true minimal test suite for a set of mutants is NP-complete\footnote{This is the \emph{Set Covering Problem}~\cite{ammann2014establishing} which is NP-Complete~\cite{karp1972reducibility}.}. The best possible approximation algorithm is
+Chvatal's~\cite{chvatal1979agreedy}, using a greedy algorithm where each
+iteration tries to choose a set that covers the largest number of mutants. This
+is given in Algorithm~\ref{alg:mintestsuite}. In the worst case, if the number
+of mutants is $n$, and the smallest test suite that can cover it is $k$, this
+algorithm will achieve a $k\cdot ln(n)$ approximation. We note that this algorithm is
+robust in practice, and usually gets results close to the actual minimum $k$ (see Figure~\ref{fig:mintest}).
+Further, Feige~\cite{feige1998a} showed that this is the closest approximation
+ratio that an algorithm can reach for set cover so long as $NP \neq P$\footnote{
+  We avoided the \emph{reverse greedy algorithm} given by
+  Ammann et al.~\cite{ammann2014establishing} for two reasons. First, while the
+  approximation ratio of the \emph{greedy} algorithm is at most $k\cdot ln(n)$ where $k$
+  is the actual minimum, that of \emph{reverse greedy} is much larger~\cite{so33685} (if any).
+  Secondly, the number of steps involved in \emph{reverse greedy} is much larger
+  than in \emph{greedy} when the size of minimal
+  set is very small compared to the full set. We also verified that the
+  \emph{minimum frequency} of kills of the set of mutants by the minimal test
+  suite was $1$. A larger \emph{minimum frequency} indicates that at least
+  that many tests are redundant, which is a rare but well-known problem with
+  the \emph{greedy} algorithm.
+}.
+
+Since it is an approximation, we average the greedily estimated minimal test suite size over $100$
+runs. The  variability is given in Figure~\ref{fig:mintest}, ordered by the size
+of minimal test suite. Note that there is very little variability, and the
+variability decreases as the size of test suite increases.  All we need
+now is to find the effectiveness of random sampling for the same number
+of mutants as  produced by the \emph{perfect} strategy.
+
+\begin{algorithm}
+\begin{algorithmic}
+\Function{MinTest}{$Tests, Mutants$}
+\State $T \gets Tests$
+\State $M \gets kill(T, Mutants)$
+\State $T_{min}\gets \emptyset$
+\While {$T \neq \emptyset \vee M \neq \emptyset$}
+    \State $t \gets random(\underset{t}\max |kill(\{t\}, M)|)$
+    \State $T \gets T\setminus \{t\}$
+    \State $M \gets kill(T, Mutants)$
+    \State $T_{min}\gets T_{min} \cup \{t\}$
+\EndWhile
+\State \Return $T_{min}$
+\EndFunction
+\end{algorithmic}
+\caption{Finding the minimal test suite}
+\label{alg:mintestsuite}
+\end{algorithm}
+
+Next, we randomly sample $|M_{perfect}^{min}|$ mutants from the original set $M_{random}$, obtain
+the minimal test suite of this sample $T_{random}^{min}$, and find the mutants from the original set
+that are killed by this test suite $kill(T_{random}^{min}, M)$, which is used to compute the utility
+of perfect strategy with respect to that particular random sample.
+The experiments were repeated $100$ times for each project, and averaged to compute $U_{perfect}$
+for the project under consideration.
+
+\begin{figure}
+<<mintc.fig, fig.height=4, out.width='.95\\linewidth', echo=F, message=F, warn=F,fig.lp="fig:">>=
+info.db$project <- with(info.db, reorder(project, best.mintc))
+
+ggplot(info.db, aes(x=project, y=meandiff)) + geom_boxplot() + theme_classic() +
+  theme( axis.text.x=element_blank()) +
+  labs(title="MinTC Distribution", x="Projects", y="MinTC")
+@
+\caption{Variation of minimal test cases for each sample as
+a percentage difference from the mean ordered by mean minimal test suite size.
+There is very little variation, and the variation decreases with test suite size.
+}
+\label{fig:mintest}
+\end{figure}
+

@@ -1,0 +1,229 @@
+\section{Theoretical Analysis}
+\label{sec:tanalysis}
+The ideal outcome for a mutation
+reduction strategy is to find the minimum set of mutants that can represent the
+complete set of mutants. A mutation reduction strategy accomplishes this by
+identifying redundant mutants and grouping them together so that a single
+mutant is sufficient to represent the entire group.
+The advantage of such a strategy over random sampling depends on two
+characteristics of the mutant population.
+First, it depends on the number of redundant
+mutants in each group of such mutants. Random sampling works best when
+these groups have equal numbers of mutants in them (uniform distribution),
+while any other distribution of mutants (skew) results in lower effectiveness
+of random sampling. However, this distribution is dependent on the program
+being evaluated. Since our goal is to find the mean advantage for a perfect
+strategy for an arbitrary program, we use the conservative distribution
+(uniform) of mutants for our theoretical analysis (we show later that the
+actual impact of this skew is less than 5\% for real world mutants).
+
+The next consideration regards the
+minimum number of mutants required to represent the entire population of
+mutants. If a mutant can be distinguished from another in terms of tests that
+detect it, then we consider both to be \emph{distinguishable} from each other
+in terms of faults they represent, and we pick a representative from each set
+of indistinguishable mutants. Note that, in the real world, the population of
+distinguishable mutants is often larger than the minimum number of mutants
+required to select a \emph{minimum test suite}\footnote{A \emph{minimum}
+test suite with respect to a set of mutants is the smallest test suite that can
+kill all mutants in the set, and a \emph{minimal} test suite is a test suite
+from which no further tests can be removed without decreaseing mutation
+score. Our approach tries to approximate the actual \emph{minimum} test suite
+using the \emph{greedy} algorithm that has an approximation bound of $k\cdot ln(n)$
+where $k$ is the true minimum, and $n$ is the number of elements.
+Since we have a strong bound on the approximation, and since the algorithm is
+robust in practice, we use the \emph{minimal} computed by the \emph{greedy}
+algorithm as a proxy for the \emph{minimum test suite}.}
+able to kill the entire mutant
+population. This is because while some mutants are distinguishable from others
+in terms of tests that detect them, there may not be any test that uniquely
+kills them\footnote{
+Consider the mutant$\times$test matrix ($1$ implies the test kills the mutant)
+$\{\{1,1,0\},\{1,0,1\},\{0,1,1\}\}$.
+While all the mutants are distinguishable, just two test cases are sufficient
+to kill them all.
+}. Since this is external to the mutant population, and also because
+such a minimum set of mutants does not represent the original population
+fully (we can get away with a lower number only because the test suite is
+inadequate), we assume that distinguishable mutants are uniquely identified
+by test cases. We note however, that having inadequate test suites favors
+random sampling, and hence lowers the advantage for a perfect mutation
+reduction strategy, because random sampling can now miss the mutant without penalty.
+We derive the limits of mutation reduction for this system using the best
+strategy possible, given oracular knowledge of mutant kills.
+
+\noindent\textbf{Impact of deviations of parameters:}\\
+\noindent\emph{Skew:} The presence of skew reduces the
+effectiveness of random sampling, and hence increases the
+utility of the perfect strategy.\\
+\noindent\emph{Distinguishability:} Any distinguishable mutant that
+is not chosen by the strategy (due to not having a unique detecting test case)
+decreases the effectiveness of the selection strategy, decreasing its utility.
+
+Before establishing a theoretical framework for utility of mutation reduction
+strategies, we must establish some terminology for the original
+and reduced mutant sets and their related test suites.
+
+\noindent\textbf{Terminology}: Let $M$ and $M_{strategy}$ denote the
+original set of mutants and the reduced set of mutants, respectively. The
+mutants from $M$ killed by a test suite $T$ are given by $kill(T,M)$
+(We use $M_{killed}$ as an alias for $kill(T,M)$).
+Similarly the tests in $T$ that kill mutants in $M$ are given by $cover(T,M)$.
+\begin{align*}
+\textrm{kill} &: \mathbb{T} \times \mathbb{M} \rightarrow \mathbb{M} \\
+\textrm{cover} &: \mathbb{T} \times \mathbb{M} \rightarrow \mathbb{T}
+\end{align*}
+The test suite $T_{strategy}$ can kill all mutants in $M_{strategy}$. That is,
+$kill(T_{strategy}, M_{strategy}) = M_{strategy}$.
+If it is minimized with respect to the mutants of the strategy, we denote it
+by $T_{strategy}^{min}$.
+
+Two mutants $m$ and $m'$ are distinguished if the tests that kill them are
+different: $cover(T, \{m\}) \ne cover(T, \{m'\})$.
+
+We use $M_{killed}^{uniq}$ to denote the set of distinguished mutants from the
+original set such that
+$\forall_{m,m' \in M} cover(T, \{m\}) \ne cover(T, \{m'\})$.
+
+The \textit{utility} ($U_{strategy}$) of a strategy is improvement in
+effectiveness due to
+using that strategy compared to the baseline (the baseline is random
+sampling of the same number\footnote{For the rest of the paper, we require that
+efficiency of random sampling is the same as that of the strategy it is compared to,
+i.e. $|M_{strategy}| = |M_{random}|$.}
+of mutants).
+\noindent That is,
+\[
+U_{strategy} = \Bigg|\frac{kill(T_{strategy}^{min}, M)}
+                    {kill(T_{random}^{min}, M)}\Bigg|- 1
+\]
+\greybox{
+Note that $T_{strategy}^{min}$ is minimized over the mutants \textbf{selected}
+by the strategy, and it is then applied against the \textbf{full set} of mutants ($M$)
+in $kill(T_{strategy}^{min}, M)$.}
+This follows the traditional evaluation of
+effectiveness, which goes as follows: start with the original set of mutants,
+and choose a subset of mutants according to the strategy. Then select a
+minimized set of test cases that can kill all the selected mutants. This
+minimized test suite is evaluated against the full set of mutants. If the
+mutation score obtained is greater than 99\%, then the reduction is deemed
+to be effective.  Note that we compare this score against the score
+of a random set of mutants of the same size, in order to handle the
+case where the full suite itself is not mutation adequate (or even
+close to adequate).  Our utility answers the question:  does this
+set of mutants better represent the test adequacy criteria
+represented by the full set of mutants than a random sample of the
+same size, and if so, by how much?
+
+The strategy that can select the perfect set of representative mutants
+(the smallest set of mutants such that they have the same minimum test suite
+as the full set)
+is called the \emph{perfect strategy}, with its utility denoted by
+$U_{perfect}$\footnote{Where unambiguous, we shorten the subscript such
+as \emph{p} for \emph{perfect}, and \emph{r} for \emph{random}.}.
+
+We now show how to derive an expression for the maximum $U_{perfect}$ for
+the idealized system with the following restrictions.
+\begin{enumerate}
+%\item Every distinguished mutant can be killed uniquely by a test case.
+%, with no detecting tests shared between strata.
+\item We assume that we have an equal number of redundant mutants for each distinguished mutant.
+\end{enumerate}
+
+From here on, we refer to a set of non-distinguished mutants as a
+\emph{stratum}, and the entire population is referred to as the \emph{strata}.
+Given any population of detected mutants, the mutation reduction strategy
+should produce a set of mutants such that if a test suite can kill all of the
+reduced set, the same test suite can kill all of the original mutant set
+(remember that $T_{strategy}$ kills all mutants in $M_{strategy}$). Hence,
+\[
+kill(T_{perfect},M) = kill(T, M)
+\]
+The quality of the test suite thus selected is dependent on the number of
+unique mutants that we are able to sample.
+Since we have supposed
+a uniform distribution, say we have $x$ elements per stratum, and total $n$ mutants.
+Our sample size $s$ would be $p \times k$ where $k$ is the number of strata, $p$
+is the number of samples from each stratum, and is a natural number; i.e. the
+sample would contain elements from each stratum, and those would have equal
+representation. Note that there will be at least one sample, and one strata:
+i.e., $s\ge 1$.  Since our strata are perfectly homogeneous
+by construction, in practice $p = 1$ is sufficient for perfect
+representation, and as we shall see below, ensures maximal advantage
+over random sampling.
+
+Next, we evaluate the number of different (unique) strata expected in a
+random sample of the same size $s$.
+
+\noindent Let $X_i$ be a random variable defined by:
+\[
+X_i = \begin{cases}
+  1 & \text{if strata \emph{i} appears in the sample}\\
+  0 & \text{otherwise}.
+\end{cases}
+\]
+\noindent Let $X$ be the number of unique strata in the sample, which is given by:
+$ X = \sum_{i=1}^{k} X_i $,
+and the expected value of X (considering that all mutants have equal chance to be sampled) is given by:
+\[
+E(X) = E(\sum_{i=1}^{k} X_i) = \sum_{i=1}^{k} E(X_i) = k\times E(X_1)
+\]
+Next, consider the probability that the mutant $1$ has been selected, where the sample size was $s = p\times k$:
+\[
+P[X_i = 1] = 1 - \left(\frac{k-1}{k}\right)^{pk}
+\]
+The expectation of $X_i$:
+\[
+E(X_1) = 1 \times P(X_i = 1)
+\]
+Hence, the expected number of unique strata appearing in a random sample is:
+\[
+k\times E(X_1) = k - k\times\left(\frac{k-1}{k}\right)^{pk}
+\]
+We already know that the number of \emph{unique} strata appearing in
+each strata-based sample is $k$ (because it is perfect, so each strata
+is unique). Hence, we compute the utility as the difference divided by the
+baseline.
+\begin{equation}
+U_{max} = \frac{k - \left( k - k\times\left(\frac{k-1}{k}\right)^{pk} \right)}{k - k\times\left(\frac{k-1}{k}\right)^{pk}} =
+\frac{1}{
+(\frac{k}{k-1})^{pk} - 1
+}
+\label{eqn:umaxk}
+\end{equation}
+This converges to\footnote{While we can expect $k$ to be finite for mutation testing, we are looking at
+the maximum possible value for this expression.
+}
+\begin{equation}
+\lim_{k \to\infty}\frac{1}{
+(\frac{k}{k-1})^{pk} - 1
+} = \frac{1}{e^p - 1}
+\label{eqn:umaxp}
+\end{equation}
+and has a maximum value when $p = 1$.
+\begin{equation}
+U_{max} = \frac{1}{e - 1} \approx 58.2\%
+\label{eqn:umax}
+\end{equation}
+Note that this is the \emph{mean} improvement expected over random sampling
+for \emph{uniform distribution} of redundant mutants in strata (and with oracular knowledge). That is,
+individual samples could still be arbitrarily advantageous (after all, the
+perfect strata sample itself is one potential random sample), but on average
+this is the expected gain over random samples.
+
+How do we interpret this result? If you have a robust set of test cases that
+is able to uniquely identify distinguishable mutants, then given an arbitrary
+program, you can expect a perfect strategy to have at least a mean $58.2$\%
+advantage over random sample of the same efficiency in terms of
+effectiveness. However, if the program produces redundant mutants that are
+skewed, then the advantage of perfect strategy with oracular knowledge will
+increase (depending on the amount of skew). Similarly, if the tests are not
+sufficient to identify distinguishable mutants uniquely, we can expect the
+advantage of the perfect strategy to decrease. Finally, strategies can rarely
+be expected to come close to perfection in terms of classifying mutants in
+terms of their behavior without post hoc knowledge of the kills. Hence the
+advantage held by such a strategy would be much much lower (or it may not
+even have an advantage).
+
+
+

@@ -1,0 +1,26 @@
+\begin{table}
+\caption{PIT Mutation Operators. The (*) operators were added or extended by us.}
+\resizebox{0.99\columnwidth}{!}{
+\begin{tabular}{ll}
+\hline \hline \\
+\Pitin & Remove negative sign from numbers\\
+\Pitrv & Mutate return values\\
+\Pitm & Mutate arithmetic operators\\
+\Pitvmc & Remove void method calls\\
+\Pitnc & Negate conditional statements\\
+\Pitcb & Modify boundaries in logical conditions\\
+\Piti & Modify increment and decrement statements\\
+\Pitnvmc & Remove non-void method calls, returning default value \\
+\Pitcc & Replace constructor calls, returning null \\
+\Pitic & Replace inline constants with default value \\
+\Pitri{}* & Remove increment and decrement statements \\
+\Pitemv & Replace member variable assignments with default value \\
+\Pites & Modify switch statements \\
+\Pitrs{}* & Replace switch labels with default (thus removing them) \\
+\Pitrc{}* & Replace boolean conditions with true\\
+\Pitdc{}* & Replace boolean conditions with false\\
+\hline
+\end{tabular}
+}
+\label{tbl:pitop}
+\end{table}
